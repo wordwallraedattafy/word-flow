@@ -865,7 +865,17 @@ function playLesson(l){
 }
 
 // --- library window ---
-const getDl=async()=>{try{return window.claude?await claude.use("downloads"):null}catch(e){return null}};
+// inside Claude the viewer confirms and saves; on a normal website a plain browser download is used
+const plainDl={save:async({filename,data})=>{
+  const u=URL.createObjectURL(new Blob([data],{type:"application/json"}));
+  const a=document.createElement("a");a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),4000);
+  return {status:"saved"};
+}};
+const getDl=async()=>{
+  if(!window.claude)return plainDl;
+  try{return await claude.use("downloads")}catch(e){return null}
+};
 let dlOk=false;
 async function openLib(){
   say("lsMsg","");$("lsTitle").value="";$("lsQ").value="";
