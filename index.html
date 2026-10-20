@@ -8,11 +8,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="English Words">
 <meta name="theme-color" content="#6366f1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap">
 <style>
-:root{--bg:#f4f7ff;--card:#fff;--ink:#1d2740;--mut:#6b7794;--pri:#4f46e5;--acc:#f59e0b;--bd:#d9e0f2;
+:root{--bg:#f4f7ff;--card:#fff;--ink:#1d2740;--mut:#6b7794;--pri:#4f46e5;--acc:#f59e0b;--bd:#d9e0f2;--bad:#c2261c;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12162a;--card:#1c2240;--ink:#eef1ff;--mut:#9aa5c8;--bd:#2f3862}}
-:root[data-theme="dark"]{--bg:#12162a;--card:#1c2240;--ink:#eef1ff;--mut:#9aa5c8;--bd:#2f3862}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12162a;--card:#1c2240;--ink:#eef1ff;--mut:#9aa5c8;--bd:#2f3862;--bad:#ff8a80}}
+:root[data-theme="dark"]{--bg:#12162a;--card:#1c2240;--ink:#eef1ff;--mut:#9aa5c8;--bd:#2f3862;--bad:#ff8a80}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
@@ -38,6 +39,120 @@ p.h{color:var(--mut);margin:0 0 14px}
 @keyframes flip{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
 #next{margin-top:4vh;font-size:26px;padding:16px 60px;background:#fff;color:#4f46e5;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 #back{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;background:rgba(255,255,255,.25);padding:8px 16px}
+[hidden]{display:none!important}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.add{background:#0369a1}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--bd)}
+.sm{padding:6px 10px;border-radius:10px}
+.msg{min-height:1.4em;margin:0;color:var(--mut)}
+.msg.bad{color:var(--bad)}
+.cell span{cursor:pointer;border-radius:8px}
+.cell span img,.pv img{width:30px;height:30px;object-fit:cover;border-radius:7px;display:block}
+.bigpic{width:min(60vw,42vh);height:min(60vw,42vh);object-fit:contain;border-radius:28px;background:rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,14,30,.62);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+#ov2{z-index:60}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--bd);border-radius:20px;width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.mh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;border-bottom:1px solid var(--bd)}
+.mh h2{margin:0;font-size:18px;min-width:0;overflow-wrap:anywhere}
+.x{background:transparent;color:var(--mut);padding:6px 12px;font-size:18px}
+.mb{padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px;min-height:0;flex:1 1 auto}
+.mb h3{margin:0;font-size:15px}
+.mb p{margin:0;color:var(--mut);font-size:14px}
+.mf{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--bd)}
+.src{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.src button{padding:16px 12px;font-size:16px}
+.opt{display:flex;gap:16px;flex-wrap:wrap}
+.opt label{display:flex;align-items:center;gap:6px;cursor:pointer}
+textarea{width:100%;min-height:84px;resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:12px;padding:10px;font:inherit;direction:ltr}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.cand{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:6px 8px;min-width:0}
+.cand label{display:flex;align-items:center;gap:8px;min-width:0;cursor:pointer;flex:1}
+.cand b{overflow-wrap:anywhere;direction:ltr;font-size:16px}
+.pv{font-size:26px;min-width:34px;text-align:center;line-height:1}
+.pv img{width:34px;height:34px}
+.cur{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#pkCur{font-size:64px;line-height:1;min-width:88px;min-height:88px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--bd);border-radius:18px}
+#pkCur img{width:88px;height:88px;object-fit:cover;border-radius:16px}
+.emos{display:flex;gap:8px;flex-wrap:wrap}
+.emo{font-size:28px;padding:6px 12px;border-radius:12px;line-height:1.2}
+.emo.on{outline:3px solid var(--pri)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row input[type=text]{width:90px;font-size:22px;text-align:center;background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:12px;padding:6px}
+.lnk{display:inline-block;text-decoration:none;border-radius:14px;padding:10px 16px;font-weight:700;background:var(--pri);color:#fff}
+#pkPaste{border:2px dashed var(--bd);border-radius:14px;padding:18px;text-align:center;color:var(--mut);background:var(--bg);cursor:text;min-height:64px}
+#pkPaste:focus{border-color:var(--pri);color:var(--ink)}
+.lib{background:#7c3aed}
+.fld{background:var(--bg);color:var(--ink);border:1px solid var(--bd);border-radius:12px;padding:10px;font:inherit}
+.row input.fld{flex:1 1 180px;min-width:0;width:auto;font-size:16px;text-align:start}
+#ltitle{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:0;right:0;padding:0 96px;text-align:center;font-weight:800;font-size:clamp(18px,3.4vw,30px);text-shadow:0 2px 10px rgba(0,0,0,.3);overflow-wrap:anywhere}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.lessons>p{grid-column:1/-1}
+.lcard{background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.lt{font-size:16px;overflow-wrap:anywhere;min-width:0}
+.ln{color:var(--mut);font-size:13px;white-space:nowrap}
+.lprev{display:flex;gap:6px;flex-wrap:wrap;font-size:22px;line-height:1;min-height:28px}
+.lprev img{width:28px;height:28px;object-fit:cover;border-radius:6px;display:block}
+.lact{display:flex;gap:6px;flex-wrap:wrap}
+.lact button{padding:8px 12px;border-radius:10px;font-size:14px}
+.lact .warn{color:var(--bad);border-color:var(--bad)}
+.game{background:#db2777}
+/* word game: one deliberate look in both themes */
+.gm{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;gap:12px;color:#fff;font-family:"Fredoka",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:radial-gradient(circle at 15% 8%,#7c3aed 0,transparent 45%),radial-gradient(circle at 88% 92%,#db2777 0,transparent 45%),linear-gradient(160deg,#1e1b4b,#312e81);padding:max(10px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));overflow:auto;direction:rtl}
+#gFx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.gtop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}
+.gbtn{background:rgba(255,255,255,.18);color:#fff;padding:8px 14px;border-radius:12px}
+.gstats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{background:rgba(255,255,255,.16);border-radius:999px;padding:6px 14px;font-weight:700;direction:ltr}
+.gpane{width:min(720px,100%);margin:auto;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.glass{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:24px;padding:22px}
+.glab{display:flex;flex-direction:column;gap:6px;text-align:start;width:100%;font-weight:700}
+.glass h2{margin:0;font-size:clamp(24px,6vw,34px)}
+.glass p{margin:0;opacity:.9}
+.gh{font-size:clamp(18px,4.6vw,28px);font-weight:700;text-align:center;margin:0}
+#gBoxes{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:clamp(8px,2vw,18px);width:100%}
+.gbox{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:22px;background:linear-gradient(145deg,hsl(var(--h),85%,62%),hsl(calc(var(--h) + 30),80%,48%));box-shadow:0 8px 0 hsl(var(--h),70%,32%),0 14px 24px rgba(0,0,0,.3);font-size:clamp(34px,9vw,64px);line-height:1;cursor:pointer;animation:bob 2.4s ease-in-out infinite;animation-delay:calc(var(--i) * -.27s);display:grid;place-items:center}
+.gbox:not(.done):not(.opening):hover{animation:wig .5s ease-in-out infinite}
+.gbox i{position:absolute;top:8px;inset-inline-start:10px;font:700 14px/1 "Fredoka",system-ui,sans-serif;font-style:normal;color:#fff;background:rgba(0,0,0,.25);border-radius:999px;padding:3px 8px}
+.gbox .mk{position:absolute;bottom:6px;inset-inline-end:8px;font-size:.38em;font-style:normal}
+.gbox.opening{animation:openbox .55s ease-in forwards}
+.gbox.done{animation:none;background:rgba(255,255,255,.14);box-shadow:none;transform:scale(.94);cursor:default}
+.stage{position:relative;width:min(52vw,34vh,300px);aspect-ratio:1;display:grid;place-items:center}
+.rays{position:absolute;inset:-35%;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.26) 0 10deg,transparent 10deg 20deg);-webkit-mask-image:radial-gradient(circle,#000 28%,transparent 66%);mask-image:radial-gradient(circle,#000 28%,transparent 66%);animation:spin 14s linear infinite}
+#gPic{position:relative;font-size:min(34vw,22vh,190px);line-height:1;filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))}
+#gPic.pop{animation:popin .7s cubic-bezier(.2,1.4,.4,1)}
+#gPic.dance{animation:dance 1.1s ease-in-out}
+#gPic.wobble{animation:wobble .5s ease-in-out}
+#gOpts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.gopt{position:relative;background:#fff;color:#1d2740;border-radius:18px;padding:clamp(12px,2.6vh,22px) 12px;font:700 clamp(22px,5.5vw,34px)/1.1 "Fredoka",system-ui,sans-serif;box-shadow:0 6px 0 #b9bfe0;direction:ltr;min-width:0;overflow-wrap:anywhere;animation:slideup .4s both;animation-delay:var(--d,0s)}
+.gopt small{position:absolute;top:6px;left:10px;font-size:12px;opacity:.5}
+.gopt:not(:disabled):hover{transform:translateY(-2px)}
+.gopt:not(:disabled):active{transform:translateY(4px);box-shadow:0 2px 0 #b9bfe0}
+.gopt.ok{background:#22c55e;color:#fff;box-shadow:0 6px 0 #15803d;animation:pulse .6s ease-in-out}
+.gopt.no{background:#ef4444;color:#fff;box-shadow:0 6px 0 #b91c1c;opacity:.7;animation:shake .45s}
+.gopt:disabled{cursor:default}
+#gFb{min-height:1.7em;font-size:clamp(18px,4.2vw,26px);font-weight:700;text-align:center}
+#gFb.good{color:#bbf7d0}
+#gFb.bad{color:#fecaca}
+.trophy{font-size:min(30vw,22vh,160px);line-height:1;animation:float 2s ease-in-out infinite}
+#gStars{font-size:clamp(28px,8vw,46px);letter-spacing:6px}
+#gSum{font-size:clamp(20px,5vw,30px);font-weight:700}
+.grow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) scale(1.05)}75%{transform:rotate(6deg) scale(1.05)}}
+@keyframes openbox{0%{transform:scale(1)}20%{transform:rotate(-10deg) scale(1.1)}40%{transform:rotate(10deg) scale(1.15)}60%{transform:rotate(-8deg) scale(1.25)}100%{transform:scale(1.7);opacity:0}}
+@keyframes popin{0%{transform:scale(0) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes dance{0%,30%,60%,100%{transform:translateY(0) rotate(0)}15%{transform:translateY(-30px) rotate(-12deg) scale(1.1)}45%{transform:translateY(-30px) rotate(12deg) scale(1.1)}80%{transform:scale(1.2)}}
+@keyframes wobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg) scale(.95)}40%{transform:rotate(12deg) scale(.95)}60%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes slideup{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+#game.flash::after{content:"";position:absolute;inset:0;background:rgba(220,38,38,.35);animation:fl .45s ease-out forwards;pointer-events:none;z-index:6}
+@keyframes fl{to{opacity:0}}
+@media (prefers-reduced-motion:reduce){.gm *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
 <body>
@@ -46,8 +161,14 @@ p.h{color:var(--mut);margin:0 0 14px}
   <p class="h">اكتب الكلمات (كلها اختيارية) أو اضغط Auto Words لتعبئتها مع الإيموجي تلقائياً، ثم اضغط Go.</p>
   <div class="bar">
     <button class="auto" id="auto">✨ Auto Words</button>
+    <select class="fld" id="autoSrc" aria-label="مصدر الكلمات التلقائية" style="max-width:220px"><option value="dict">من القاموس</option><option value="all">القاموس + دروسي</option><option value="mine">من كل دروسي</option><optgroup label="درس محدد" id="autoLs"></optgroup></select>
+    <button class="add" id="addBtn">➕ إضافة كلمات</button>
+    <button class="lib" id="libBtn">📚 الدروس</button>
+    <button class="game" id="gameBtn">🎮 لعبة الكلمات</button>
     <button class="clr" id="clr">مسح الكل</button>
   </div>
+  <p class="msg" id="setMsg" role="status"></p>
+  <div class="row" id="undoRow" hidden><button class="ghost sm" id="undoBtn">↩︎ تراجع عن التحميل</button></div>
   <div id="grid"></div>
   <div class="bar" style="justify-content:center"><button class="go" id="go">Go ▶</button></div>
   <div class="foot">👥 الآن: <b id="vNow">1</b> · 📈 زوار منذ الإنشاء: <b id="vAll">—</b> · 🔁 الزيارات: <b id="vTot">1</b></div>
@@ -55,8 +176,161 @@ p.h{color:var(--mut);margin:0 0 14px}
 
 <div id="show">
   <button id="back">✕</button>
+  <div id="ltitle" dir="auto"></div>
   <div id="card"><div id="emo"></div><div id="word"></div></div>
   <button id="next">Next ➜</button>
+</div>
+
+<!-- نافذة إضافة الكلمات -->
+<div class="ov" id="ov1" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="t1">
+    <div class="mh"><h2 id="t1">➕ إضافة كلمات</h2><button class="x ghost" id="ov1x" aria-label="إغلاق">✕</button></div>
+
+    <div class="mb" id="stSrc">
+      <div class="src">
+        <button id="bFile">📄 رفع ملف</button>
+        <button id="bCam">📷 الكاميرا</button>
+      </div>
+      <p>الملفات النصية: txt وcsv وmd وjson. الصور: صفحة مكتوبة أو صورة كاميرا.</p>
+      <div class="opt" role="radiogroup" aria-label="طريقة قراءة الصورة">
+        <label><input type="radio" name="imode" value="text" checked> قراءة الكلمات المكتوبة في الصورة</label>
+        <label><input type="radio" name="imode" value="obj"> التعرف على الشيء في الصورة (تُحفظ الصورة مع الكلمة)</label>
+      </div>
+      <div>
+        <h3>أو الصق نصاً</h3>
+        <textarea id="txtIn" placeholder="Paste English text here" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:8px"><button id="txtGo" class="ghost">استخراج الكلمات</button><button id="toSel" class="ghost" hidden>عرض الكلمات المستخرجة</button></div>
+      </div>
+      <p class="msg" id="addMsg" role="status"></p>
+      <input type="file" id="fFile" accept=".txt,.csv,.tsv,.md,.json,text/*,image/*" hidden>
+      <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+    </div>
+
+    <div class="mb" id="stSel" hidden>
+      <div class="tools">
+        <button class="ghost sm" id="sAll">تحديد الكل</button>
+        <button class="ghost sm" id="sNone">إلغاء التحديد</button>
+        <button class="ghost sm" id="sKnown">الكلمات التي لها صورة</button>
+        <button class="ghost sm" id="sAI">✨ اقتراح صور</button>
+        <button class="ghost sm" id="sMore">＋ مصدر آخر</button>
+      </div>
+      <p id="selCount" role="status"></p>
+      <div id="cands"></div>
+      <label class="opt" style="font-size:14px"><span><input type="checkbox" id="clrFirst"> مسح الكلمات الحالية أولاً</span></label>
+      <p class="msg" id="selMsg" role="status"></p>
+    </div>
+    <div class="mf" id="mfSel" hidden>
+      <button class="ghost" id="selClr">مسح القائمة</button>
+      <button class="go" id="addGo" style="font-size:17px;padding:12px 28px">إضافة المحدد</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة اختيار الصورة -->
+<div class="ov" id="ov2" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="t2">
+    <div class="mh"><h2 id="t2">🖼️ صورة الكلمة <span id="pkW" dir="ltr"></span></h2><button class="x ghost" id="ov2x" aria-label="إغلاق">✕</button></div>
+    <div class="mb">
+      <div class="cur"><div id="pkCur" aria-live="polite"></div><button class="ghost sm" id="pkReset">إرجاع الصورة الأصلية</button></div>
+
+      <div>
+        <h3>① صور مقترحة</h3>
+        <div class="emos" id="pkSug"></div>
+        <p id="pkNone" hidden>لا توجد اقتراحات لهذه الكلمة بعد.</p>
+        <div class="row" style="margin-top:8px">
+          <button class="ghost sm" id="pkAI">✨ اقتراح المزيد</button>
+          <input type="text" id="pkEmoInp" placeholder="😀" maxlength="8" aria-label="اكتب إيموجي">
+          <button class="ghost sm" id="pkEmoGo">استخدام الإيموجي</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>② صورة من جهازك</h3>
+        <div class="row"><button class="ghost" id="pkUp">اختيار صورة</button></div>
+        <input type="file" id="pkFile" accept="image/*" hidden>
+      </div>
+
+      <div>
+        <h3>③ صورة من الإنترنت</h3>
+        <p>افتح البحث، انسخ الصورة التي تعجبك، ثم الصقها في المربع أدناه. يمكنك أيضاً حفظها ثم اختيارها من جهازك.</p>
+        <div class="row" style="margin:8px 0">
+          <a class="lnk" id="pkWeb" target="_blank" rel="noopener noreferrer">🔎 بحث صور Google</a>
+          <a class="lnk" id="pkPix" target="_blank" rel="noopener noreferrer">🔎 Pixabay</a>
+        </div>
+        <div id="pkPaste" contenteditable="true" inputmode="none" tabindex="0" role="textbox" aria-label="مكان لصق الصورة">اضغط هنا ثم الصق الصورة (Ctrl+V أو لصق بالضغط المطوّل)</div>
+      </div>
+      <p class="msg" id="pkMsg" role="status"></p>
+    </div>
+    <div class="mf"><span></span><button class="go" id="pkDone" style="font-size:17px;padding:12px 28px">تم</button></div>
+  </div>
+</div>
+
+<!-- لعبة الكلمات -->
+<div class="gm" id="game" hidden role="dialog" aria-modal="true" aria-label="لعبة الكلمات">
+  <canvas id="gFx" aria-hidden="true"></canvas>
+  <div class="gtop">
+    <button class="gbtn" id="gQuit" aria-label="خروج من اللعبة">✕</button>
+    <div class="gstats" id="gStats" hidden><span class="chip">⭐ <b id="gScore">0</b></span><span class="chip">🔥 <b id="gStreak">0</b></span><span class="chip">📦 <b id="gProg">0/0</b></span></div>
+    <button class="gbtn" id="gSnd" aria-label="الصوت" aria-pressed="true">🔊</button>
+  </div>
+
+  <div class="gpane glass" id="gStart">
+    <h2>🎮 لعبة الكلمات</h2>
+    <p>افتح صندوقاً، شاهد الصورة، ثم اختر الكلمة الإنجليزية الصحيحة.</p>
+    <label class="glab" for="gLesson">الدرس<select id="gLesson" class="fld"></select></label>
+    <label class="glab" for="gCount">عدد الصناديق<select id="gCount" class="fld"><option value="6">6</option><option value="9" selected>9</option><option value="12">12</option></select></label>
+    <button class="go" id="gGo">ابدأ اللعب ▶</button>
+    <button class="gbtn" id="gShare" hidden>🔗 مشاركة اللعبة برابط</button>
+    <input type="text" class="fld" id="gLink" readonly hidden dir="ltr" aria-label="رابط اللعبة" style="width:100%">
+    <p id="gShareMsg" role="status" style="margin:0;min-height:1.4em;font-weight:700"></p>
+  </div>
+
+  <div class="gpane" id="gBoard" hidden>
+    <p class="gh">اختر صندوقاً لتكتشف الصورة 🎁</p>
+    <div id="gBoxes"></div>
+  </div>
+
+  <div class="gpane" id="gQ" hidden>
+    <div class="stage"><div class="rays"></div><div id="gPic" role="img" aria-label="صورة الكلمة"></div></div>
+    <p class="gh">ماذا تُسمّى هذه الصورة بالإنجليزية؟</p>
+    <div id="gOpts"></div>
+    <div id="gFb" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="gpane glass" id="gEnd" hidden>
+    <div class="trophy" id="gTrophy">🏆</div>
+    <div id="gStars" aria-hidden="true"></div>
+    <div class="gh" id="gMsg"></div>
+    <div id="gSum"></div>
+    <div id="gBest"></div>
+    <div class="grow"><button class="go" id="gAgain">العب مرة أخرى</button><button class="gbtn" id="gMenu">القائمة</button></div>
+  </div>
+</div>
+
+<!-- نافذة الدروس -->
+<div class="ov" id="ov3" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="t3">
+    <div class="mh"><h2 id="t3">📚 الدروس</h2><button class="x ghost" id="ov3x" aria-label="إغلاق">✕</button></div>
+    <div class="mb">
+      <div>
+        <h3>حفظ الكلمات الحالية كدرس</h3>
+        <div class="row" style="margin:8px 0 4px"><input type="text" class="fld" id="lsTitle" maxlength="60" placeholder="عنوان الدرس، مثل: الحيوانات" aria-label="عنوان الدرس"><button id="lsSave">حفظ الدرس</button></div>
+        <p id="lsSaveInfo"></p>
+      </div>
+      <div class="row">
+        <input type="text" class="fld" id="lsQ" placeholder="بحث في الدروس" aria-label="بحث في الدروس">
+        <button class="ghost sm" id="lsExp" hidden>📤 تصدير كل دروسي</button>
+        <button class="ghost sm" id="lsImp">📥 استيراد ملف دروس</button>
+      </div>
+      <p class="msg" id="lsMsg" role="status"></p>
+      <p class="msg bad" id="lsMem" hidden>التخزين الدائم غير متاح في هذا العرض. الدروس تبقى حتى إغلاق الصفحة فقط، فصدّرها لحفظها.</p>
+      <h3>دروسي <span id="lsMineN"></span></h3>
+      <div class="lessons" id="lsMine"></div>
+      <h3>دروس جاهزة</h3>
+      <div class="lessons" id="lsBuilt"></div>
+      <input type="file" id="lsFile" accept=".json,application/json" hidden>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -65,7 +339,13 @@ const DICT={};RAW.split(",").forEach(p=>{const [w,e]=p.split("=");DICT[w]=e});
 const KEYS=Object.keys(DICT);
 const N=40,REPEAT=0.01;
 const $=id=>document.getElementById(id);
-const emojiOf=w=>{w=w.toLowerCase().trim();return DICT[w]||DICT[w.replace(/(e?s)$/,"")]||DICT[w.replace(/s$/,"")]||"📝"};
+// per-device pictures: EMO = chosen emoji, PICS = user images (data URLs), SUG = suggested emoji
+const key=w=>String(w||"").toLowerCase().trim();
+const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||"");return v&&typeof v==="object"?v:d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+const EMO=ld("ew_emo",{}),SUG=ld("ew_sug",{}),PICS=ld("ew_img",{});
+const emojiOf=w=>{w=key(w);return EMO[w]||DICT[w]||DICT[w.replace(/(e?s)$/,"")]||DICT[w.replace(/s$/,"")]||(SUG[w]&&SUG[w][0])||"📝"};
+function paint(el,w){el.textContent="";w=key(w);if(!w)return;const u=PICS[w];if(u){const im=new Image();im.src=u;im.alt=w;el.appendChild(im)}else el.textContent=emojiOf(w)}
 
 // build inputs
 const grid=$("grid"),inputs=[],prevs=[];
@@ -74,11 +354,15 @@ for(let i=0;i<N;i++){
   const n=document.createElement("b");n.textContent=i+1;
   const inp=document.createElement("input");inp.type="text";inp.placeholder="word";inp.autocomplete="off";inp.spellcheck=false;
   const sp=document.createElement("span");
-  inp.addEventListener("input",()=>{sp.textContent=inp.value.trim()?emojiOf(inp.value):"";save()});
+  inp.addEventListener("input",()=>{paint(sp,inp.value);save();dropUndo()});
+  sp.tabIndex=0;sp.setAttribute("role","button");sp.title="اختيار صورة للكلمة";
+  const pickHere=()=>{if(inp.value.trim())openPicker(inp.value,()=>paint(sp,inp.value))};
+  sp.addEventListener("click",pickHere);
+  sp.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pickHere()}});
   c.append(n,inp,sp);grid.appendChild(c);inputs.push(inp);prevs.push(sp);
 }
 function save(){try{localStorage.setItem("ew_words",JSON.stringify(inputs.map(i=>i.value)))}catch(e){}}
-function refresh(){inputs.forEach((inp,i)=>prevs[i].textContent=inp.value.trim()?emojiOf(inp.value):"")}
+function refresh(){inputs.forEach((inp,i)=>paint(prevs[i],inp.value))}
 try{const s=JSON.parse(localStorage.getItem("ew_words")||"[]");s.forEach((v,i)=>{if(inputs[i])inputs[i].value=v});refresh()}catch(e){}
 
 // app icon for home-screen shortcut (generated PNG)
@@ -117,20 +401,43 @@ $("vTot").textContent=localV;
 
 // Auto Words: fill empty boxes with random kid-friendly words
 const fy=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-$("auto").onclick=()=>{
+$("auto").onclick=async()=>{
+  dropUndo();
   const empty=inputs.filter(i=>!i.value.trim());
   if(!empty.length)return;
-  const used=new Set(inputs.map(i=>i.value.trim().toLowerCase()).filter(Boolean));
+  const src=$("autoSrc").value;
+  // candidate words: dictionary and/or lessons (lesson items carry their pictures)
+  const map=new Map();
+  if(src==="dict"||src==="all")KEYS.forEach(w=>map.set(w,{w}));
+  if(src!=="dict"){
+    let ls=[];try{ls=await lsAll()}catch(e){}
+    if(src.startsWith("l:"))ls=ls.filter(l=>l.id===src.slice(2));
+    ls.forEach(l=>l.items.forEach(it=>map.set(key(it.w),{w:it.w,img:it.img,e:it.e,lesson:true})));
+  }
+  const used=new Set(inputs.map(i=>key(i.value)).filter(Boolean));
   let hist=[];try{hist=JSON.parse(localStorage.getItem("ew_hist")||"[]")}catch(e){}
-  // prefer words not used now and not given in recent auto-fills
-  let pool=KEYS.filter(k=>!used.has(k)&&!hist.includes(k));
-  if(pool.length<empty.length){hist=[];pool=KEYS.filter(k=>!used.has(k))}
+  const all=[...map.entries()].filter(([k])=>!used.has(k));
+  if(!all.length){say("setMsg",src==="dict"?"لا توجد كلمات جديدة.":"لا توجد كلمات جديدة في دروسك. أضف دروساً أو غيّر المصدر.",1);return}
+  // prefer words not given in recent auto-fills
+  let pool=all.filter(([k])=>!hist.includes(k));
+  if(pool.length<empty.length){hist=[];pool=all}
   pool=fy(pool);
-  empty.forEach(inp=>{if(pool.length){const w=pool.pop();inp.value=w;hist.push(w)}});
-  try{localStorage.setItem("ew_hist",JSON.stringify(hist))}catch(e){}
+  let n=0;
+  empty.forEach(inp=>{
+    if(!pool.length)return;
+    const [k,it]=pool.pop();
+    inp.value=it.w;hist.push(k);n++;
+    if(it.lesson){
+      if(it.img)PICS[k]=it.img;else delete PICS[k];
+      if(it.e)EMO[k]=it.e;else delete EMO[k];
+    }
+  });
+  try{localStorage.setItem("ew_hist",JSON.stringify(hist.slice(-400)))}catch(e){}
+  const saved=sv("ew_img",PICS);sv("ew_emo",EMO);
   refresh();save();
+  say("setMsg",(n<empty.length?"لا توجد كلمات كافية في هذا المصدر: ":"")+"أضيفت "+n+" كلمة"+(saved?".":" · المساحة ممتلئة: بعض الصور لن تُحفظ."),n<empty.length||!saved);
 };
-$("clr").onclick=()=>{inputs.forEach(i=>i.value="");refresh();save()};
+$("clr").onclick=()=>{dropUndo();activeTitle="";inputs.forEach(i=>i.value="");refresh();save()};
 
 // show mode
 let list=[],bag=[],seen=[],cur=null,busy=false;
@@ -146,7 +453,11 @@ function pick(){
   if(w===cur&&bag.length){const x=bag.pop();bag.push(w);w=x}
   return w;
 }
-function render(w){cur=w;if(!seen.includes(w))seen.push(w);$("word").textContent=w;$("emo").textContent=emojiOf(w)}
+function render(w){
+  cur=w;if(!seen.includes(w))seen.push(w);$("word").textContent=w;
+  const eo=$("emo"),u=PICS[key(w)];eo.textContent="";
+  if(u){const im=new Image();im.src=u;im.alt=w;im.className="bigpic";eo.appendChild(im)}else eo.textContent=emojiOf(w);
+}
 $("go").onclick=()=>{
   list=[...new Set(inputs.map(i=>i.value.trim()).filter(Boolean))];
   if(!list.length){alert("اكتب كلمة واحدة على الأقل أو اضغط Auto Words");return}
@@ -154,6 +465,7 @@ $("go").onclick=()=>{
   $("setup").style.display="none";$("show").style.display="flex";
   try{const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}catch(e){}
   render(pick());
+  $("ltitle").textContent=activeTitle||"";
 };
 $("next").onclick=()=>{
   if(busy)return;busy=true;$("next").disabled=true;
@@ -165,6 +477,897 @@ $("back").onclick=()=>{
   $("show").style.display="none";$("setup").style.display="block";
   try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
 };
+
+// ===== add-words window =====
+const STOP=new Set("a an the and or but if of to in on at by for with from as is am are was were be been it its he she we they you i me my his her our their your this that these those do does did has have had not no so than then too very can will would could should there here what when who how into over also just".split(" "));
+let cands=[],reading=false;
+const say=(id,t,bad)=>{const e=$(id);e.textContent=t||"";e.className=bad?"msg bad":"msg"};
+const errText=e=>({not_granted:"لم يُسمح بقراءة الصور. اسمح بالطلب ثم أعد المحاولة.",rate_limited:"الطلبات كثيرة. انتظر قليلاً ثم أعد المحاولة.",images_unavailable:"قراءة الصور غير متاحة في هذا العرض.",image_rejected:"تعذّر استخدام هذه الصورة. جرّب صورة أخرى."}[e&&e.code]||"تعذّر إكمال الطلب. حاول مرة أخرى.");
+const getSample=async()=>{try{return window.claude?await claude.use("sample"):null}catch(e){return null}};
+
+function extract(text){
+  const out=[],seen=new Set();
+  (String(text).slice(0,1000000).match(/[A-Za-z]+(?:'[A-Za-z]+)?/g)||[]).forEach(t=>{
+    let w=t.toLowerCase();
+    if(/'s$/.test(w))w=w.slice(0,-2);else if(w.includes("'"))return;
+    if(w.length<3||w.length>20||STOP.has(w)||seen.has(w))return;
+    seen.add(w);out.push(w);
+  });
+  return out;
+}
+// resize an image file; returns a data URL, or a JPEG Blob when asBlob is true
+function toJpeg(file,max,q,asBlob){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{
+      const s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)||1);
+      const c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.naturalWidth*s));c.height=Math.max(1,Math.round(im.naturalHeight*s));
+      const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(u);
+      if(asBlob)c.toBlob(b=>b?res(b):rej(new Error("blob")),"image/jpeg",q);else res(c.toDataURL("image/jpeg",q));
+    };
+    im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("img"))};
+    im.src=u;
+  });
+}
+
+// --- steps ---
+function showStep(s){
+  $("stSrc").hidden=s!==1;$("stSel").hidden=s!==2;$("mfSel").hidden=s!==2;
+  $("toSel").hidden=!cands.length;$("toSel").textContent="عرض الكلمات المستخرجة ("+cands.length+")";
+  if(s===2)drawCands();
+}
+function openAdd(){say("addMsg","");say("selMsg","");showStep(1);$("ov1").hidden=false;$("bFile").focus()}
+function closeAdd(){$("ov1").hidden=true;$("addBtn").focus()}
+$("addBtn").onclick=openAdd;
+$("ov1x").onclick=closeAdd;
+$("toSel").onclick=()=>showStep(2);
+$("sMore").onclick=()=>{say("addMsg","");showStep(1)};
+$("selClr").onclick=()=>{cands=[];showStep(1)};
+
+function addCands(words,img){
+  const have=new Set(cands.map(c=>c.w));let n=0;
+  words.forEach(w=>{w=key(w);if(!w||have.has(w)||cands.length>=200)return;have.add(w);cands.push({w,sel:true,img:img||undefined});n++});
+  return n;
+}
+function finish(words,img){
+  const n=addCands(words,img);
+  if(!n){say("addMsg",cands.length?"لم أجد كلمات جديدة في هذا المصدر.":"لم أجد كلمات إنجليزية في هذا المصدر.",1);showStep(1);return}
+  say("addMsg","");showStep(2);
+}
+function setBusy(b){reading=b;["bFile","bCam","txtGo"].forEach(i=>$(i).disabled=b)}
+
+// --- sources ---
+const PROMPT={
+  text:"The attached image is a photo or scan of printed or handwritten English text (a page, list, board or worksheet). Read it and list the distinct English words that appear, in order of appearance, lower-case, without punctuation or digits. Skip articles, pronouns, prepositions and other function words (the, a, and, is, of, to, you). Skip anything that is not an English word. Return ONLY a JSON array of strings with at most 80 items.",
+  obj:"The attached image shows an everyday object, animal, food, place or scene. Name the main thing in it with one simple English noun that an English learner aged 10 to 13 would study (for example apple or dog). If several clearly different main things are shown, list up to 5. Return ONLY a JSON array of lower-case strings."
+};
+async function fromImage(file){
+  const mode=document.querySelector('input[name="imode"]:checked').value;
+  say("addMsg","جارٍ قراءة الصورة…");
+  const sample=await getSample();
+  const lim=sample?await sample.limits().catch(()=>null):null;
+  if(!sample||!lim||!lim.images){say("addMsg","قراءة الصور غير متاحة هنا. استخدم ملفاً نصياً أو الصق النص.",1);return}
+  let out;
+  try{
+    const blob=await toJpeg(file,1600,.85,true);
+    out=await sample.json(PROMPT[mode],{images:[blob],modelTier:"quick",cache:false});
+  }catch(e){say("addMsg",errText(e),1);return}
+  let arr=Array.isArray(out)?out:(out&&Array.isArray(out.words)?out.words:[]);
+  arr=arr.filter(x=>typeof x==="string").map(x=>key(x).replace(/[^a-z' -]/g,"").trim());
+  if(mode==="obj"){
+    arr=arr.filter(x=>x.length>=2&&x.length<=24);
+    const img=arr.length===1?await toJpeg(file,520,.7).catch(()=>undefined):undefined;
+    finish(arr,img);
+  }else{
+    finish(arr.flatMap(x=>x.split(/[\s-]+/)).filter(x=>x.length>=3&&x.length<=20&&!x.includes("'")&&!STOP.has(x)));
+  }
+}
+async function handleFile(file){
+  if(!file||reading)return;
+  setBusy(true);
+  try{
+    if(file.type.startsWith("image/")||/\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name))await fromImage(file);
+    else if(file.size>5e6)say("addMsg","الملف كبير. اختر ملفاً أصغر من 5 ميغابايت.",1);
+    else finish(extract(await file.text()));
+  }catch(e){say("addMsg","تعذّرت قراءة الملف.",1)}
+  finally{setBusy(false)}
+}
+$("bFile").onclick=()=>$("fFile").click();
+$("bCam").onclick=()=>$("fCam").click();
+[["fFile"],["fCam"]].forEach(([id])=>$(id).addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];e.target.value="";handleFile(f)}));
+$("txtGo").onclick=()=>{
+  const t=$("txtIn").value;
+  if(!t.trim()){say("addMsg","الصق نصاً أولاً.",1);return}
+  finish(extract(t));
+};
+
+// --- choose words ---
+function paintC(el,c){el.textContent="";if(c.img){const im=new Image();im.src=c.img;im.alt=c.w;el.appendChild(im)}else paint(el,c.w)}
+function count(){
+  const n=cands.filter(c=>c.sel).length,free=inputs.filter(i=>!i.value.trim()).length;
+  $("selCount").textContent="المحدد: "+n+" من "+cands.length+" · المربعات الفارغة: "+free;
+}
+function drawCands(){
+  const box=$("cands");box.textContent="";
+  cands.forEach(c=>{
+    const d=document.createElement("div");d.className="cand";
+    const l=document.createElement("label");
+    const cb=document.createElement("input");cb.type="checkbox";cb.checked=c.sel;
+    cb.onchange=()=>{c.sel=cb.checked;count()};
+    const pv=document.createElement("span");pv.className="pv";paintC(pv,c);
+    const w=document.createElement("b");w.textContent=c.w;
+    l.append(cb,pv,w);
+    const b=document.createElement("button");b.className="ghost sm";b.textContent="🖼️";b.title="اختيار صورة";b.setAttribute("aria-label","اختيار صورة للكلمة "+c.w);
+    b.onclick=()=>openPicker(c.w,()=>paintC(pv,c),c);
+    d.append(l,b);box.appendChild(d);
+  });
+  count();
+}
+const hasPic=c=>!!(c.img||PICS[c.w]||EMO[c.w]||emojiOf(c.w)!=="📝");
+$("sAll").onclick=()=>{cands.forEach(c=>c.sel=true);drawCands()};
+$("sNone").onclick=()=>{cands.forEach(c=>c.sel=false);drawCands()};
+$("sKnown").onclick=()=>{cands.forEach(c=>c.sel=hasPic(c));drawCands()};
+
+async function suggestEmoji(words){
+  const sample=await getSample();
+  if(!sample)throw {code:"unavailable"};
+  const out=await sample.json("For each English word below, suggest up to 4 different emoji that best help a child aged 10 to 13 understand its meaning, most fitting first. Words: "+JSON.stringify(words)+". Return ONLY a JSON object that maps each word to an array of emoji strings.",{modelTier:"quick"});
+  const o={};Object.keys(out||{}).forEach(k=>o[key(k)]=out[k]);
+  let n=0;
+  words.forEach(w=>{const a=o[w];if(Array.isArray(a)){const clean=a.filter(e=>typeof e==="string"&&e.length<=12&&/[^\x00-\x7F]/.test(e)).slice(0,4);if(clean.length){SUG[w]=clean;n++}}});
+  sv("ew_sug",SUG);
+  return n;
+}
+$("sAI").onclick=async()=>{
+  const ws=cands.filter(c=>!hasPic(c)).map(c=>c.w).slice(0,40);
+  if(!ws.length){say("selMsg","كل الكلمات لها صور مقترحة.");return}
+  $("sAI").disabled=true;say("selMsg","جارٍ اقتراح الصور…");
+  try{const n=await suggestEmoji(ws);say("selMsg",n?"تم اقتراح صور لـ "+n+" كلمة.":"لم أجد اقتراحات جديدة.");drawCands()}
+  catch(e){say("selMsg",e&&e.code==="unavailable"?"الاقتراح غير متاح هنا.":errText(e),1)}
+  finally{$("sAI").disabled=false}
+};
+
+$("addGo").onclick=()=>{
+  dropUndo();
+  const chosen=cands.filter(c=>c.sel);
+  if(!chosen.length){say("selMsg","اختر كلمة واحدة على الأقل.",1);return}
+  if($("clrFirst").checked)inputs.forEach(i=>i.value="");
+  const have=new Set(inputs.map(i=>key(i.value)).filter(Boolean));
+  const empty=inputs.filter(i=>!i.value.trim());
+  const done=new Set();let n=0,dup=0;
+  chosen.forEach(c=>{
+    if(have.has(c.w)){dup++;done.add(c);return}
+    const slot=empty.shift();if(!slot)return;
+    slot.value=c.w;have.add(c.w);done.add(c);n++;
+    if(c.img)PICS[c.w]=c.img;
+  });
+  const saved=sv("ew_img",PICS);
+  cands=cands.filter(c=>!done.has(c));
+  refresh();save();
+  const left=chosen.length-done.size;
+  let m="أضيفت "+n+" كلمة"+(dup?" · "+dup+" موجودة مسبقاً":"")+(saved?"":" · المساحة ممتلئة: بعض الصور لن تُحفظ");
+  if(left>0){
+    say("selMsg",m+". بقيت "+left+" كلمة بلا مكان. فعّل «مسح الكلمات الحالية أولاً» أو امسح بعض المربعات.",1);
+    drawCands();
+  }else{
+    say("setMsg",m+".");closeAdd();
+  }
+};
+
+// --- picture picker ---
+let pk=null;
+function openPicker(w,done,ctx){
+  pk={w:key(w),done:done||null,ctx:ctx||null};
+  $("pkW").textContent=pk.w;
+  $("pkWeb").href="https://www.google.com/search?tbm=isch&q="+encodeURIComponent(pk.w+" for kids");
+  $("pkPix").href="https://pixabay.com/images/search/"+encodeURIComponent(pk.w)+"/";
+  $("pkEmoInp").value="";say("pkMsg","");
+  drawPicker();$("ov2").hidden=false;$("pkDone").focus();
+}
+function closePicker(){$("ov2").hidden=true;pk=null}
+function pkChanged(){
+  sv("ew_emo",EMO);
+  if(pk.ctx&&pk.ctx.img)delete pk.ctx.img;
+  drawPicker();if(pk.done)pk.done();
+}
+function drawPicker(){
+  const k=pk.w,ownImg=pk.ctx&&pk.ctx.img;
+  paintC($("pkCur"),ownImg?pk.ctx:{w:k});
+  const opts=[...new Set([EMO[k],DICT[k],DICT[k.replace(/s$/,"")],...(SUG[k]||[])].filter(Boolean))];
+  const cur=emojiOf(k),box=$("pkSug");box.textContent="";
+  opts.forEach(e=>{
+    const b=document.createElement("button");b.className="emo ghost";b.textContent=e;b.setAttribute("aria-label","استخدام "+e);
+    if(!PICS[k]&&!ownImg&&cur===e)b.classList.add("on");
+    b.onclick=()=>{EMO[k]=e;delete PICS[k];sv("ew_img",PICS);pkChanged()};
+    box.appendChild(b);
+  });
+  $("pkNone").hidden=opts.length>0;
+}
+async function setPicture(file){
+  if(!file||!file.type.startsWith("image/")){say("pkMsg","اختر ملف صورة.",1);return}
+  try{
+    PICS[pk.w]=await toJpeg(file,520,.7);
+    const ok=sv("ew_img",PICS);
+    say("pkMsg",ok?"تم حفظ الصورة.":"المساحة ممتلئة. ستظهر الصورة في هذه الجلسة فقط.",!ok);
+    pkChanged();
+  }catch(e){say("pkMsg","تعذّرت قراءة الصورة.",1)}
+}
+$("pkReset").onclick=()=>{delete EMO[pk.w];delete PICS[pk.w];sv("ew_img",PICS);say("pkMsg","");pkChanged()};
+$("pkUp").onclick=()=>$("pkFile").click();
+$("pkFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];e.target.value="";setPicture(f)});
+$("pkEmoGo").onclick=()=>{
+  const v=$("pkEmoInp").value.trim();
+  const g=v?(typeof Intl!=="undefined"&&Intl.Segmenter?[...new Intl.Segmenter().segment(v)].map(s=>s.segment):[...v])[0]:"";
+  if(!g||!/[^\x00-\x7F]/.test(g)){say("pkMsg","اكتب إيموجي واحداً.",1);return}
+  EMO[pk.w]=g;delete PICS[pk.w];sv("ew_img",PICS);say("pkMsg","");pkChanged();
+};
+$("pkAI").onclick=async()=>{
+  $("pkAI").disabled=true;say("pkMsg","جارٍ اقتراح الصور…");
+  try{const n=await suggestEmoji([pk.w]);say("pkMsg",n?"":"لم أجد اقتراحات جديدة.");drawPicker();if(pk.done)pk.done()}
+  catch(e){say("pkMsg",e&&e.code==="unavailable"?"الاقتراح غير متاح هنا.":errText(e),1)}
+  finally{$("pkAI").disabled=false}
+};
+const pz=$("pkPaste");
+pz.addEventListener("beforeinput",e=>e.preventDefault());
+pz.addEventListener("paste",e=>{
+  e.preventDefault();
+  const f=[...(e.clipboardData?e.clipboardData.files:[])].find(x=>x.type.startsWith("image/"));
+  if(f)setPicture(f);else say("pkMsg","لم أجد صورة في الحافظة. انسخ الصورة نفسها وليس رابطها.",1);
+});
+pz.addEventListener("dragover",e=>e.preventDefault());
+pz.addEventListener("drop",e=>{
+  e.preventDefault();
+  const f=[...(e.dataTransfer?e.dataTransfer.files:[])].find(x=>x.type.startsWith("image/"));
+  if(f)setPicture(f);else say("pkMsg","اسحب ملف الصورة نفسه. الروابط لا تعمل هنا.",1);
+});
+$("ov2x").onclick=closePicker;
+$("pkDone").onclick=closePicker;
+[["ov1",closeAdd],["ov2",closePicker]].forEach(([id,fn])=>$(id).addEventListener("click",e=>{if(e.target.id===id)fn()}));
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  if(!$("game").hidden){closeGame();return}
+  if(!$("ov2").hidden)closePicker();else if(!$("ov1").hidden)closeAdd();else if(!$("ov3").hidden)closeLib();
+});
+
+// ===== lessons library =====
+let activeTitle="",lastSnap=null,idb=null,memLessons=[],lsReady=null,idn=0;
+// --- logic:start
+const BUILTIN=[
+  ["fruits","Fruits · الفواكه","apple banana orange grape watermelon strawberry lemon pineapple cherry peach pear"],
+  ["animals","Animals · الحيوانات","cat dog lion tiger elephant monkey rabbit horse cow pig sheep bear giraffe zebra fox panda"],
+  ["sea","The Sea · البحر","fish dolphin whale shark octopus crab turtle penguin ocean ship anchor island beach"],
+  ["transport","Transport · المواصلات","car bus train plane ship bicycle rocket helicopter tractor ambulance motorcycle"],
+  ["nature","Weather and Nature · الطقس والطبيعة","sun moon star cloud rain snow rainbow lightning tornado mountain volcano tree flower leaf"],
+  ["food","Food · الطعام","bread cheese egg milk pizza burger cake cookie candy chocolate popcorn sandwich soup corn"],
+  ["school","School · المدرسة","book pencil pen bag clock calendar computer map globe school scissors paint microscope telescope"],
+  ["body","My Body · الجسم","hand eye ear nose mouth brain tooth heart smile"]
+].map(([id,title,ws])=>({id:"b-"+id,title,builtin:true,items:ws.split(" ").map(w=>({w}))}));
+const defEmoji=w=>{const k=key(w);return DICT[k]||DICT[k.replace(/(e?s)$/,"")]||DICT[k.replace(/s$/,"")]||"📝"};
+const newId=()=>Date.now().toString(36)+(idn++).toString(36)+Math.random().toString(36).slice(2,5);
+function uniqTitle(t,list){
+  const have=new Set(list.map(l=>key(l.title)));
+  if(!have.has(key(t)))return t;
+  let n=2;while(have.has(key(t+" ("+n+")")))n++;
+  return t+" ("+n+")";
+}
+// validate one lesson read from an imported file (untrusted)
+function cleanLesson(o){
+  if(!o||typeof o!=="object")return null;
+  const title=String(o.title||"").trim().slice(0,60);
+  if(!title||!Array.isArray(o.items))return null;
+  const seen=new Set(),items=[];
+  for(const it of o.items){
+    if(!it||typeof it.w!=="string")continue;
+    const w=it.w.trim();
+    if(!/^[A-Za-z][A-Za-z '-]{0,38}$/.test(w))continue;
+    const k=key(w);if(seen.has(k))continue;seen.add(k);
+    const x={w};
+    if(typeof it.e==="string"&&it.e.length<=16&&/[^\x00-\x7F]/.test(it.e))x.e=it.e;
+    if(typeof it.img==="string"&&it.img.length<=600000&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(it.img))x.img=it.img;
+    items.push(x);
+    if(items.length>=N)break;
+  }
+  return items.length?{title,items}:null;
+}
+// storage: IndexedDB, with an in-memory fallback when it is unavailable
+function lsInit(){
+  if(lsReady)return lsReady;
+  lsReady=new Promise(res=>{
+    try{
+      const r=indexedDB.open("ew_lessons",1);
+      r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains("lessons"))r.result.createObjectStore("lessons",{keyPath:"id"})};
+      r.onsuccess=()=>{idb=r.result;idb.onversionchange=()=>idb.close();res()};
+      r.onerror=r.onblocked=()=>{idb=null;res()};
+    }catch(e){idb=null;res()}
+  });
+  return lsReady;
+}
+const reqP=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const txDone=t=>new Promise((res,rej)=>{t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)});
+async function lsAll(){await lsInit();return idb?await reqP(idb.transaction("lessons").objectStore("lessons").getAll()):memLessons.slice()}
+async function lsPut(l){
+  await lsInit();
+  if(idb){const t=idb.transaction("lessons","readwrite");t.objectStore("lessons").put(l);await txDone(t)}
+  else{const i=memLessons.findIndex(x=>x.id===l.id);if(i<0)memLessons.push(l);else memLessons[i]=l}
+}
+async function lsDel(id){
+  await lsInit();
+  if(idb){const t=idb.transaction("lessons","readwrite");t.objectStore("lessons").delete(id);await txDone(t)}
+  else memLessons=memLessons.filter(x=>x.id!==id);
+}
+// --- logic:end
+
+function collectCurrent(){
+  const seen=new Set(),items=[];
+  inputs.forEach(i=>{
+    const w=i.value.trim(),k=key(w);
+    if(!k||seen.has(k))return;seen.add(k);
+    const it={w};
+    if(PICS[k])it.img=PICS[k];
+    const eff=emojiOf(k);
+    if(eff!=="📝"&&eff!==defEmoji(k))it.e=eff;
+    items.push(it);
+  });
+  return items;
+}
+function dropUndo(){lastSnap=null;$("undoRow").hidden=true}
+function applyLesson(l,append){
+  lastSnap={words:inputs.map(i=>i.value),EMO:{...EMO},PICS:{...PICS},title:activeTitle};
+  if(!append)inputs.forEach(i=>i.value="");
+  const have=new Set(inputs.map(i=>key(i.value)).filter(Boolean));
+  const empty=inputs.filter(i=>!i.value.trim());
+  let n=0,dup=0,over=0;
+  l.items.slice(0,N).forEach(it=>{
+    const k=key(it.w);
+    if(have.has(k)){dup++;return}
+    const slot=empty.shift();if(!slot){over++;return}
+    slot.value=it.w;have.add(k);n++;
+    if(!l.builtin){
+      if(it.img)PICS[k]=it.img;else delete PICS[k];
+      if(it.e)EMO[k]=it.e;else delete EMO[k];
+    }
+  });
+  if(!append){
+    const inGrid=new Set(inputs.map(i=>key(i.value)).filter(Boolean));
+    [EMO,PICS].forEach(m=>Object.keys(m).forEach(k=>{if(!inGrid.has(k))delete m[k]}));
+  }
+  activeTitle=append?"":l.title;
+  const saved=sv("ew_img",PICS);sv("ew_emo",EMO);
+  refresh();save();
+  $("undoRow").hidden=false;
+  return {n,dup,over,saved};
+}
+$("undoBtn").onclick=()=>{
+  const s=lastSnap;if(!s)return;
+  inputs.forEach((inp,i)=>inp.value=s.words[i]||"");
+  Object.keys(EMO).forEach(k=>delete EMO[k]);Object.assign(EMO,s.EMO);
+  Object.keys(PICS).forEach(k=>delete PICS[k]);Object.assign(PICS,s.PICS);
+  sv("ew_img",PICS);sv("ew_emo",EMO);
+  activeTitle=s.title;dropUndo();refresh();save();
+  say("setMsg","تم التراجع عن التحميل.");
+};
+function loadLesson(l,append){
+  const r=applyLesson(l,append);
+  let m=append?"أضيفت "+r.n+" كلمة من «"+l.title+"»":"تم تحميل «"+l.title+"» ("+r.n+" كلمة)";
+  if(r.dup)m+=" · "+r.dup+" موجودة مسبقاً";
+  if(r.over)m+=" · "+r.over+" لم تتسع";
+  if(!r.saved)m+=" · المساحة ممتلئة: بعض الصور لن تُحفظ";
+  say("setMsg",m+".",r.over>0);
+  closeLib();
+}
+function playLesson(l){
+  applyLesson(l,false);
+  if(!inputs.some(i=>i.value.trim())){say("lsMsg","هذا الدرس فارغ.",1);return}
+  say("setMsg","تشغيل «"+l.title+"».");
+  $("ov3").hidden=true;
+  $("go").click();
+}
+
+// --- library window ---
+const getDl=async()=>{try{return window.claude?await claude.use("downloads"):null}catch(e){return null}};
+let dlOk=false;
+async function openLib(){
+  say("lsMsg","");$("lsTitle").value="";$("lsQ").value="";
+  lsInfo();
+  $("ov3").hidden=false;$("ov3x").focus();
+  dlOk=!!(await getDl());$("lsExp").hidden=!dlOk;
+  renderLessons();
+}
+function closeLib(){$("ov3").hidden=true;$("libBtn").focus()}
+const lsInfo=()=>{$("lsSaveInfo").textContent="الكلمات الحالية في المربعات: "+collectCurrent().length};
+function btn(txt,cls,fn){const b=document.createElement("button");b.textContent=txt;if(cls)b.className=cls;b.onclick=fn;return b}
+// destructive buttons ask once more, inside the page
+function twoBtn(txt,ask,fn){
+  const b=btn(txt,"ghost warn",null);let t=null;
+  b.onclick=()=>{
+    if(t){clearTimeout(t);t=null;b.textContent=txt;fn();return}
+    b.textContent=ask;t=setTimeout(()=>{t=null;b.textContent=txt},3500);
+  };
+  return b;
+}
+function card(l){
+  const c=document.createElement("div");c.className="lcard";
+  const h=document.createElement("div");h.className="lh";
+  const t=document.createElement("b");t.className="lt";t.dir="auto";t.textContent=l.title;
+  const n=document.createElement("span");n.className="ln";n.textContent=l.items.length+" كلمة"+(l.builtin?" · جاهز":"");
+  h.append(t,n);
+  const pv=document.createElement("div");pv.className="lprev";
+  l.items.slice(0,8).forEach(it=>{
+    const s=document.createElement("span");
+    if(it.img){const im=new Image();im.src=it.img;im.alt=it.w;s.appendChild(im)}else s.textContent=it.e||defEmoji(it.w);
+    pv.appendChild(s);
+  });
+  const a=document.createElement("div");a.className="lact";
+  a.append(btn("▶ تشغيل","go",()=>playLesson(l)),btn("📥 تحميل","",()=>loadLesson(l,false)),btn("➕ إضافة","ghost",()=>loadLesson(l,true)));
+  const b=document.createElement("div");b.className="lact";
+  if(l.builtin){
+    b.append(btn("نسخ إلى دروسي","ghost",async()=>{
+      try{
+        const all=await lsAll(),title=uniqTitle(l.title,all);
+        await lsPut({id:newId(),title,created:Date.now(),updated:Date.now(),items:l.items.map(i=>({w:i.w}))});
+        say("lsMsg","تمت إضافة «"+title+"» إلى دروسي.");renderLessons();
+      }catch(e){say("lsMsg","تعذّر الحفظ.",1)}
+    }));
+  }else{
+    b.append(btn("✏️ تسمية","ghost",()=>renameCard(l,t)),twoBtn("🔄 تحديث","تأكيد التحديث؟",()=>updateLesson(l)));
+    if(dlOk)b.append(btn("📤 تصدير","ghost",()=>exportLessons([l],(l.title.replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"")||"lesson")+".json")));
+    b.append(twoBtn("🗑️ حذف","تأكيد الحذف؟",async()=>{
+      try{await lsDel(l.id);say("lsMsg","تم حذف «"+l.title+"».")}catch(e){say("lsMsg","تعذّر الحذف.",1)}
+      renderLessons();
+    }));
+  }
+  c.append(h,pv,a,b);
+  return c;
+}
+function fillList(box,arr,empty){
+  box.textContent="";
+  if(!arr.length){const p=document.createElement("p");p.textContent=empty;box.appendChild(p);return}
+  arr.forEach(l=>box.appendChild(card(l)));
+}
+async function renderLessons(){
+  let mine=[];
+  try{mine=await lsAll()}catch(e){say("lsMsg","تعذّرت قراءة الدروس المحفوظة.",1)}
+  $("lsMem").hidden=!!idb;
+  mine.sort((a,b)=>(b.updated||0)-(a.updated||0));
+  const q=key($("lsQ").value),f=l=>!q||key(l.title).includes(q);
+  $("lsMineN").textContent="("+mine.length+")";
+  fillList($("lsMine"),mine.filter(f),mine.length?"لا توجد نتائج.":"لا توجد دروس محفوظة بعد. اكتب كلمات في المربعات، ثم اكتب عنواناً واضغط «حفظ الدرس».");
+  fillList($("lsBuilt"),BUILTIN.filter(f),"لا توجد نتائج.");
+  fillAutoSrc();
+}
+// source list for Auto Words: dictionary, all lessons, or one lesson
+let wantSrc="dict";try{wantSrc=localStorage.getItem("ew_asrc")||"dict"}catch(e){}
+async function fillAutoSrc(){
+  let ls=[];try{ls=await lsAll()}catch(e){}
+  ls.sort((a,b)=>(b.updated||0)-(a.updated||0));
+  const g=$("autoLs"),sel=$("autoSrc");
+  g.textContent="";
+  ls.forEach(l=>{const o=document.createElement("option");o.value="l:"+l.id;o.textContent=l.title+" ("+l.items.length+")";g.appendChild(o)});
+  g.hidden=!ls.length;
+  sel.value=[...sel.options].some(o=>o.value===wantSrc)?wantSrc:"dict";
+}
+$("autoSrc").addEventListener("change",()=>{wantSrc=$("autoSrc").value;try{localStorage.setItem("ew_asrc",wantSrc)}catch(e){}});
+fillAutoSrc();
+function renameCard(l,t){
+  const inp=document.createElement("input");inp.type="text";inp.className="fld";inp.value=l.title;inp.maxLength=60;inp.style.width="100%";
+  inp.setAttribute("aria-label","اسم الدرس");
+  t.replaceWith(inp);inp.focus();inp.select();
+  let done=false;
+  const commit=async ok=>{
+    if(done)return;done=true;
+    const v=inp.value.trim().slice(0,60);
+    if(ok&&v&&v!==l.title){
+      try{
+        const all=await lsAll();
+        l.title=uniqTitle(v,all.filter(x=>x.id!==l.id));l.updated=Date.now();
+        await lsPut(l);
+      }catch(e){say("lsMsg","تعذّر حفظ الاسم.",1)}
+    }
+    renderLessons();
+  };
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="Enter")commit(true);
+    else if(e.key==="Escape"){e.stopPropagation();commit(false)}
+  });
+  inp.addEventListener("blur",()=>commit(true));
+}
+async function updateLesson(l){
+  const items=collectCurrent();
+  if(!items.length){say("lsMsg","اكتب كلمات في المربعات أولاً.",1);return}
+  try{
+    l.items=items;l.updated=Date.now();await lsPut(l);
+    say("lsMsg","تم تحديث «"+l.title+"» ("+items.length+" كلمة).");
+  }catch(e){say("lsMsg","تعذّر الحفظ. ربما المساحة ممتلئة.",1)}
+  renderLessons();
+}
+$("lsSave").onclick=async()=>{
+  const t=$("lsTitle").value.trim().slice(0,60),items=collectCurrent();
+  if(!t){say("lsMsg","اكتب عنواناً للدرس.",1);$("lsTitle").focus();return}
+  if(!items.length){say("lsMsg","اكتب كلمات في المربعات أولاً.",1);return}
+  try{
+    const title=uniqTitle(t,await lsAll());
+    await lsPut({id:newId(),title,created:Date.now(),updated:Date.now(),items});
+    $("lsTitle").value="";
+    say("lsMsg","تم حفظ «"+title+"» ("+items.length+" كلمة).");
+    renderLessons();
+  }catch(e){say("lsMsg","تعذّر الحفظ. ربما المساحة ممتلئة.",1)}
+};
+$("lsTitle").addEventListener("keydown",e=>{if(e.key==="Enter")$("lsSave").click()});
+$("lsQ").addEventListener("input",()=>renderLessons());
+
+// --- export / import ---
+async function exportLessons(arr,name){
+  const dl=await getDl();
+  if(!dl){say("lsMsg","الحفظ كملف غير متاح هنا.",1);return}
+  try{
+    await dl.save({filename:name,data:JSON.stringify({format:"ew-lessons",v:1,lessons:arr.map(l=>({title:l.title,items:l.items}))})});
+    say("lsMsg","تم إرسال الملف للحفظ.");
+  }catch(e){
+    const no=e&&e.code==="declined";
+    say("lsMsg",no?"أُلغي الحفظ.":"تعذّر حفظ الملف.",!no);
+  }
+}
+$("lsExp").onclick=async()=>{
+  let all=[];try{all=await lsAll()}catch(e){}
+  if(!all.length){say("lsMsg","لا توجد دروس لتصديرها.",1);return}
+  exportLessons(all,"english-lessons.json");
+};
+$("lsImp").onclick=()=>$("lsFile").click();
+$("lsFile").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value="";
+  if(!f)return;
+  if(f.size>40e6){say("lsMsg","الملف كبير جداً.",1);return}
+  try{
+    const o=JSON.parse(await f.text());
+    const arr=o&&o.format==="ew-lessons"&&Array.isArray(o.lessons)?o.lessons.slice(0,500).map(cleanLesson).filter(Boolean):[];
+    if(!arr.length){say("lsMsg","الملف لا يحتوي دروساً صالحة.",1);return}
+    const all=await lsAll();
+    for(const x of arr){
+      const l={id:newId(),title:uniqTitle(x.title,all),created:Date.now(),updated:Date.now(),items:x.items};
+      await lsPut(l);all.push(l);
+    }
+    say("lsMsg","تم استيراد "+arr.length+" درس.");
+    renderLessons();
+  }catch(err){say("lsMsg","تعذّرت قراءة الملف. اختر ملف دروس صالحاً.",1)}
+});
+
+$("libBtn").onclick=openLib;
+$("ov3x").onclick=closeLib;
+$("ov3").addEventListener("click",e=>{if(e.target.id==="ov3")closeLib()});
+
+// ===== word game =====
+// --- game logic:start
+// words that have a picture: a user image, or an emoji other than the placeholder
+function buildPool(ls){
+  const seen=new Set(),out=[];
+  ls.forEach(l=>l.items.forEach(it=>{
+    const k=key(it.w);if(!k||seen.has(k))return;
+    const e=it.e||defEmoji(it.w);
+    if(!it.img&&e==="📝")return;
+    seen.add(k);out.push({w:it.w,img:it.img,e});
+  }));
+  return out;
+}
+// wrong answers: other words from the same pool first, then the dictionary
+function distract(pool,word,n){
+  const seen=new Set([key(word.w)]),out=[];
+  fy(pool).forEach(x=>{const k=key(x.w);if(out.length<n&&!seen.has(k)){seen.add(k);out.push(x.w)}});
+  if(out.length<n)fy(KEYS).forEach(x=>{if(out.length<n&&!seen.has(x)){seen.add(x);out.push(x)}});
+  return out;
+}
+// four shuffled options; the right one never lands where it did last time
+function makeOptions(pool,word,last){
+  const others=distract(pool,word,3);
+  let opts,pos,t=0;
+  do{opts=fy([word.w,...others]);pos=opts.indexOf(word.w);t++}while(pos===last&&t<30);
+  return {opts,pos};
+}
+// --- game logic:end
+
+const G={pool:[],words:[],done:{},score:0,streak:0,ok:0,tm:[],busy:false,locked:false,cur:-1,lastPos:-1,muted:false};
+try{G.muted=localStorage.getItem("ew_mute")==="1"}catch(e){}
+const later=(fn,ms)=>{G.tm.push(setTimeout(fn,ms))};
+const pick1=a=>a[Math.floor(Math.random()*a.length)];
+const gPanes=["gStart","gBoard","gQ","gEnd"];
+const gShow=id=>{gPanes.forEach(p=>{$(p).hidden=p!==id});$("gStats").hidden=id==="gStart"};
+const reduced=()=>{try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}};
+const replay=(el,cls)=>{el.classList.remove("pop","dance","wobble");void el.offsetWidth;if(cls)el.classList.add(cls)};
+
+// --- sound (synthesised, no files) ---
+let AC=null;
+function ac(){
+  try{
+    if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C()}
+    if(AC&&AC.state==="suspended")AC.resume();
+  }catch(e){}
+  return AC;
+}
+function tone(f,t0,d,type,vol,to){
+  if(G.muted)return;
+  const a=ac();if(!a)return;
+  try{
+    const t=a.currentTime+t0,o=a.createOscillator(),g=a.createGain();
+    o.type=type||"sine";o.frequency.setValueAtTime(f,t);
+    if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol||.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05);
+  }catch(e){}
+}
+const SFX={
+  open(){tone(280,0,.28,"triangle",.2,900)},
+  reveal(){[880,1175,1568].forEach((f,i)=>tone(f,i*.07,.18,"sine",.12))},
+  tick(){tone(700,0,.06,"square",.05)},
+  good(){[523,659,784,1047].forEach((f,i)=>tone(f,i*.09,.24,"triangle",.2))},
+  bad(){tone(220,0,.35,"sawtooth",.13,90);tone(160,.12,.35,"square",.07,70)},
+  win(){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*.12,.3,"triangle",.2))}
+};
+function speak(w){
+  if(G.muted)return;
+  try{
+    const s=window.speechSynthesis;if(!s)return;
+    s.cancel();const u=new SpeechSynthesisUtterance(w);u.lang="en-US";u.rate=.85;s.speak(u);
+  }catch(e){}
+}
+function sndIcon(){const b=$("gSnd");b.textContent=G.muted?"🔇":"🔊";b.setAttribute("aria-pressed",G.muted?"false":"true")}
+$("gSnd").onclick=()=>{
+  G.muted=!G.muted;sndIcon();
+  try{localStorage.setItem("ew_mute",G.muted?"1":"0")}catch(e){}
+  if(G.muted){try{speechSynthesis.cancel()}catch(e){}}else SFX.tick();
+};
+
+// --- confetti ---
+const fx=$("gFx"),fc=fx.getContext("2d");
+let parts=[],raf=0;
+function fxSize(){
+  const r=window.devicePixelRatio||1;
+  fx.width=Math.round(innerWidth*r);fx.height=Math.round(innerHeight*r);fc.setTransform(r,0,0,r,0,0);
+}
+window.addEventListener("resize",()=>{if(!$("game").hidden)fxSize()});
+const COLS=["#fde047","#f472b6","#34d399","#60a5fa","#fb923c","#ffffff","#c084fc"];
+function burst(x,y,n,spread){
+  if(reduced())n=Math.ceil(n/4);
+  for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*(spread||13),vy:-Math.random()*13-3,g:.38,s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:pick1(COLS),life:70+Math.random()*50});
+  if(!raf)raf=requestAnimationFrame(loop);
+}
+function loop(){
+  fc.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+30);
+  parts.forEach(p=>{
+    p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life--;
+    fc.save();fc.translate(p.x,p.y);fc.rotate(p.r);fc.fillStyle=p.c;fc.globalAlpha=Math.min(1,p.life/25);
+    fc.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);fc.restore();
+  });
+  raf=parts.length?requestAnimationFrame(loop):0;
+  if(!raf)fc.clearRect(0,0,innerWidth,innerHeight);
+}
+function rain(){for(let i=0;i<6;i++)later(()=>burst(Math.random()*innerWidth,innerHeight*.35,40,18),i*260)}
+
+// --- game flow ---
+function clearG(){
+  G.tm.forEach(clearTimeout);G.tm=[];
+  try{speechSynthesis.cancel()}catch(e){}
+  parts=[];fc.clearRect(0,0,innerWidth,innerHeight);
+  $("game").classList.remove("flash");
+}
+function gStat(){
+  $("gScore").textContent=G.score;$("gStreak").textContent=G.streak;
+  $("gProg").textContent=Object.keys(G.done).length+"/"+G.words.length;
+}
+function fillLessons(){
+  const s=$("gLesson"),keep=s.value||(G.shared?"shared":"");s.textContent="";
+  const add=(v,t)=>{const o=document.createElement("option");o.value=v;o.textContent=t;s.appendChild(o)};
+  if(G.shared)add("shared","🎁 "+G.shared.title);
+  add("ready","كل الدروس الجاهزة");
+  add("grid","الكلمات في المربعات الآن");
+  BUILTIN.forEach(l=>add(l.id,l.title));
+  add("mine","دروسي (بصورها)");
+  if([...s.options].some(o=>o.value===keep))s.value=keep;
+}
+async function gamePool(){
+  const v=$("gLesson").value;let ls=[];
+  if(v==="mine"){try{ls=await lsAll()}catch(e){ls=[]}}
+  else if(v==="shared"&&G.shared)ls=[{items:G.shared.items}];
+  else if(v==="grid")ls=[{items:collectCurrent()}];
+  else if(v==="ready")ls=BUILTIN;
+  else ls=BUILTIN.filter(l=>l.id===v);
+  return buildPool(ls);
+}
+function openGame(){
+  fillLessons();clearG();
+  G.score=0;G.streak=0;G.words=[];G.done={};gStat();sndIcon();
+  gShow("gStart");
+  $("game").hidden=false;fxSize();$("gGo").focus();
+}
+function closeGame(){clearG();$("game").hidden=true;$("gameBtn").focus()}
+async function startRound(){
+  clearG();
+  const go=$("gGo");go.disabled=true;
+  const pool=await gamePool();
+  go.disabled=false;
+  if(!pool.length){
+    gShow("gStart");
+    alert_("لا توجد كلمات مصورة في هذا الدرس. اختر درساً آخر.");
+    return;
+  }
+  ac();
+  const n=Math.min(parseInt($("gCount").value,10)||9,pool.length);
+  G.pool=pool;G.words=fy(pool).slice(0,n);G.done={};G.score=0;G.streak=0;G.ok=0;G.busy=false;G.locked=false;G.lastPos=-1;
+  $("gBoxes").style.setProperty("--cols",String(n<=9?3:4));
+  gStat();renderBoard();gShow("gBoard");
+  SFX.reveal();
+}
+// in-page notice (no alert dialogs in the viewer)
+function alert_(t){
+  let n=$("gNote");
+  if(!n){n=document.createElement("p");n.id="gNote";n.setAttribute("role","status");n.style.cssText="margin:0;font-weight:700;color:#fecaca";$("gStart").insertBefore(n,$("gGo"))}
+  n.textContent=t;
+}
+function renderBoard(){
+  const box=$("gBoxes");box.textContent="";
+  G.words.forEach((w,i)=>{
+    const b=document.createElement("button");b.className="gbox";
+    b.style.setProperty("--h",String((i*47)%360));b.style.setProperty("--i",String(i));
+    const num=document.createElement("i");num.textContent=i+1;
+    const d=G.done[i];
+    if(d===undefined){
+      b.append(num,"🎁");
+      b.setAttribute("aria-label","صندوق "+(i+1));
+      b.onclick=()=>openBox(i,b);
+    }else{
+      b.classList.add("done");b.disabled=true;
+      const mk=document.createElement("em");mk.className="mk";mk.textContent=d?"✅":"❌";
+      b.append(num,w.img?"🖼️":w.e,mk);
+      b.setAttribute("aria-label","صندوق "+(i+1)+(d?" صحيح":" خطأ"));
+    }
+    box.appendChild(b);
+  });
+}
+function paintPic(el,w){
+  el.textContent="";
+  if(w.img){
+    const im=new Image();im.src=w.img;im.alt="";
+    im.style.cssText="width:min(52vw,34vh,300px);height:min(52vw,34vh,300px);object-fit:cover;border-radius:24px;display:block";
+    el.appendChild(im);
+  }else el.textContent=w.e;
+}
+function openBox(i,b){
+  if(G.busy)return;G.busy=true;
+  SFX.open();b.classList.add("opening");
+  later(()=>askQ(i),600);
+}
+function askQ(i){
+  const w=G.words[i];G.cur=i;G.locked=false;
+  const {opts,pos}=makeOptions(G.pool,w,G.lastPos);G.lastPos=pos;
+  const pic=$("gPic");paintPic(pic,w);replay(pic,"pop");
+  const o=$("gOpts");o.textContent="";
+  opts.forEach((t,k)=>{
+    const b=document.createElement("button");b.className="gopt";b.dataset.w=t;
+    b.style.setProperty("--d",(k*.08)+"s");
+    const s=document.createElement("small");s.textContent=k+1;
+    b.append(s,t);
+    b.onclick=()=>answer(b,w);
+    o.appendChild(b);
+  });
+  const fb=$("gFb");fb.textContent="";fb.className="";
+  gShow("gQ");SFX.reveal();
+  burst(innerWidth/2,innerHeight*.28,24,10);
+}
+const PRAISE=["Great!","Awesome!","Perfect!","Well done!","Super!","Amazing!","Fantastic!"];
+function answer(btn,w){
+  if(G.locked)return;G.locked=true;
+  const i=G.cur,right=key(btn.dataset.w)===key(w.w),pic=$("gPic"),fb=$("gFb");
+  [...$("gOpts").children].forEach(b=>{b.disabled=true});
+  SFX.tick();
+  if(right){
+    G.streak++;G.ok++;G.score+=10+Math.min(G.streak,5)*2;G.done[i]=true;
+    btn.classList.add("ok");replay(pic,"dance");
+    SFX.good();
+    const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,70);
+    fb.className="good";fb.textContent="🥳 "+pick1(PRAISE)+(G.streak>=3?" 🔥 x"+G.streak:"");
+    later(()=>speak(w.w),350);
+    later(gBack,1900);
+  }else{
+    G.streak=0;G.done[i]=false;
+    btn.classList.add("no");replay(pic,"wobble");
+    SFX.bad();
+    const g=$("game");g.classList.remove("flash");void g.offsetWidth;g.classList.add("flash");
+    fb.className="bad";fb.textContent="😅 Oops! It's "+w.w;
+    later(()=>{
+      [...$("gOpts").children].forEach(b=>{if(key(b.dataset.w)===key(w.w))b.classList.add("ok")});
+      speak(w.w);
+    },700);
+    later(gBack,2600);
+  }
+  gStat();
+}
+function gBack(){
+  G.busy=false;
+  if(Object.keys(G.done).length>=G.words.length){endGame();return}
+  renderBoard();gShow("gBoard");
+}
+function endGame(){
+  const n=G.words.length,pct=n?G.ok/n:0,st=pct>=.9?3:pct>=.6?2:1;
+  let best=0;try{best=parseInt(localStorage.getItem("ew_best")||"0",10)||0}catch(e){}
+  const rec=G.score>best;
+  if(rec){try{localStorage.setItem("ew_best",String(G.score))}catch(e){}}
+  $("gTrophy").textContent=st===3?"🏆":st===2?"🎉":"💪";
+  $("gStars").textContent="⭐".repeat(st)+"☆".repeat(3-st);
+  $("gMsg").textContent=st===3?"رائع جداً!":st===2?"أحسنت!":"استمر في المحاولة!";
+  $("gSum").textContent="النتيجة: "+G.score+" · الصحيحة: "+G.ok+" من "+n;
+  $("gBest").textContent=rec?"🎉 رقم قياسي جديد!":best?"أفضل نتيجة: "+best:"";
+  gShow("gEnd");
+  SFX.win();rain();$("gAgain").focus();
+}
+$("gameBtn").onclick=openGame;
+$("gGo").onclick=startRound;
+$("gAgain").onclick=startRound;
+$("gMenu").onclick=openGame;
+$("gQuit").onclick=closeGame;
+
+// --- share the game by link (settings travel in the URL hash; works on any static host) ---
+// --- share logic:start
+const SHARE_MAX=100;
+function encodeShare(title,items){
+  const o={v:1,t:String(title).slice(0,60),i:items.slice(0,SHARE_MAX).map(x=>x.e?[x.w,x.e]:[x.w])};
+  const bytes=new TextEncoder().encode(JSON.stringify(o));
+  let s="";bytes.forEach(b=>s+=String.fromCharCode(b));
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function decodeShare(str){
+  try{
+    let b=String(str).replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+    const bin=atob(b),bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    const o=JSON.parse(new TextDecoder().decode(bytes));
+    if(!o||o.v!==1||!Array.isArray(o.i))return null;
+    const title=String(o.t||"").trim().slice(0,60)||"لعبة مشتركة";
+    const seen=new Set(),items=[];
+    for(const it of o.i){
+      if(!Array.isArray(it)||typeof it[0]!=="string")continue;
+      const w=it[0].trim();
+      if(!/^[A-Za-z][A-Za-z '-]{0,38}$/.test(w))continue;
+      const k=w.toLowerCase();if(seen.has(k))continue;seen.add(k);
+      const x={w};
+      if(typeof it[1]==="string"&&it[1].length<=16&&/[^\x00-\x7F]/.test(it[1]))x.e=it[1];
+      items.push(x);
+      if(items.length>=SHARE_MAX)break;
+    }
+    return items.length?{title,items}:null;
+  }catch(e){return null}
+}
+// --- share logic:end
+// the button is for pages hosted outside Claude, where the address is a real link anyone can open
+if(!window.claude)$("gShare").hidden=false;
+$("gShare").onclick=async()=>{
+  const msg=$("gShareMsg"),inp=$("gLink");
+  msg.textContent="";inp.hidden=true;
+  const sel=$("gLesson"),title=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].textContent.replace(/^🎁\s*/,""):"لعبة";
+  const pool=await gamePool();
+  const items=pool.filter(p=>p.e!=="📝").map(p=>({w:p.w,e:defEmoji(p.w)===p.e?"":p.e}));
+  const skipped=pool.length-items.length;
+  if(!items.length){msg.textContent="لا توجد كلمات يمكن مشاركتها. اختر درساً فيه كلمات بإيموجي.";return}
+  const url=location.href.split("#")[0]+"#g="+encodeShare(title,items);
+  inp.value=url;inp.hidden=false;
+  let note=items.length>SHARE_MAX?"تمت مشاركة أول "+SHARE_MAX+" كلمة. ":"";
+  if(skipped)note+=skipped+" كلمة بلا إيموجي لم تُضمَّن. ";
+  if(pool.some(p=>p.img))note+="الصور المرفوعة لا تُشارك، وتظهر بدلها الإيموجي. ";
+  try{await navigator.clipboard.writeText(url);msg.textContent="تم نسخ الرابط. "+note}
+  catch(e){inp.focus();inp.select();msg.textContent="انسخ الرابط من المربع. "+note}
+};
+// opening a shared link starts straight in the game with those words
+(function(){
+  const m=/^#g=([A-Za-z0-9_-]+)$/.exec(location.hash);
+  if(!m)return;
+  const s=decodeShare(m[1]);if(!s)return;
+  G.shared=s;
+  openGame();
+})();
+document.addEventListener("keydown",e=>{
+  if($("game").hidden||$("gQ").hidden||G.locked)return;
+  const k="1234".indexOf(e.key);
+  if(k>=0){const b=$("gOpts").children[k];if(b)b.click()}
+});
 </script>
 </body>
 </html>
