@@ -764,8 +764,21 @@ const BUILTIN=[
   ["nature","Weather and Nature · الطقس والطبيعة","sun moon star cloud rain snow rainbow lightning tornado mountain volcano tree flower leaf"],
   ["food","Food · الطعام","bread cheese egg milk pizza burger cake cookie candy chocolate popcorn sandwich soup corn"],
   ["school","School · المدرسة","book pencil pen bag clock calendar computer map globe school scissors paint microscope telescope"],
-  ["body","My Body · الجسم","hand eye ear nose mouth brain tooth heart smile"]
-].map(([id,title,ws])=>({id:"b-"+id,title,builtin:true,items:ws.split(" ").map(w=>({w}))}));
+  ["body","My Body · الجسم","hand eye ear nose mouth brain tooth heart smile"],
+  // "word:emoji" gives a picture of its own; "_" stands for a space
+  ["sports","Sports · الرياضة","soccer:⚽ basketball:🏀 tennis:🎾 baseball:⚾ volleyball:🏐 swimming:🏊 running:🏃 cycling:🚴 boxing:🥊 golf:⛳ karate:🥋 archery:🏹 skiing:⛷️ medal:🏅 bowling:🎳"],
+  ["colors","Colors · الألوان","red:🔴 blue:🔵 green:🟢 yellow:🟡 orange:🟠 purple:🟣 brown:🟤 black:⚫ white:⚪ pink:💗"],
+  ["shapes","Shapes · الأشكال","circle:⭕ square:🟦 triangle:🔺 star:⭐ heart:❤️ diamond:🔶 octagon:🛑 cross:❌ arrow:➡️ crescent:🌙"],
+  ["town","Places in Town · المراكز","police_station:🚓 fire_station:🚒 post_office:📮 supermarket:🛒 mall:🛍️ bakery:🥖 pharmacy:💊 restaurant:🍽️ cinema:🎬 gym:🏋️ airport:🛫 library:📖 gas_station:⛽ bank:🏦"],
+  ["buildings","Buildings · المباني","house school hospital castle mosque:🕌 church:⛪ hotel:🏨 bank:🏦 factory:🏭 stadium:🏟️ museum:🏛️ tower:🗼 office:🏢 store:🏪"],
+  ["places","Locations · المواقع","beach mountain volcano island forest:🌲 desert:🏜️ farm:🌾 city:🏙️ village:🏘️ park:🏞️ garden:🌷 camp:⛺"],
+  ["drinks","Drinks · المشروبات","water milk coffee juice:🧃 tea:🍵 soda:🥤 lemonade:🍹"]
+].map(([id,title,ws])=>({id:"b-"+id,title,builtin:true,items:ws.split(" ").map(t=>{const [w,e]=t.split(":");return e?{w:w.replace(/_/g," "),e}:{w}})}));
+// words from the new lessons also become typeable words with their picture, and join Auto Words
+BUILTIN.forEach(l=>l.items.forEach(it=>{
+  const k=key(it.w);
+  if(it.e&&!(k in DICT)){DICT[k]=it.e;if(!k.includes(" "))KEYS.push(k)}
+}));
 const defEmoji=w=>{const k=key(w);return DICT[k]||DICT[k.replace(/(e?s)$/,"")]||DICT[k.replace(/s$/,"")]||"📝"};
 const newId=()=>Date.now().toString(36)+(idn++).toString(36)+Math.random().toString(36).slice(2,5);
 function uniqTitle(t,list){
@@ -852,6 +865,9 @@ function applyLesson(l,append){
     if(!l.builtin){
       if(it.img)PICS[k]=it.img;else delete PICS[k];
       if(it.e)EMO[k]=it.e;else delete EMO[k];
+    }else{
+      // ready-made lessons define the picture, e.g. orange is 🟠 in Colors but 🍊 in Fruits
+      if(it.e&&it.e!==DICT[k])EMO[k]=it.e;else delete EMO[k];
     }
   });
   if(!append){
