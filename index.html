@@ -324,6 +324,29 @@ textarea{width:100%;min-height:84px;resize:vertical;background:var(--bg);color:v
       </div>
       <p class="msg" id="lsMsg" role="status"></p>
       <p class="msg bad" id="lsMem" hidden>التخزين الدائم غير متاح في هذا العرض. الدروس تبقى حتى إغلاق الصفحة فقط، فصدّرها لحفظها.</p>
+      <details id="sbBox" hidden>
+        <summary><b>☁️ مزامنة الدروس بين الأجهزة</b> <span id="sbState"></span></summary>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:10px">
+          <p>اربط الصفحة بمشروع Supabase مجاني لتظهر دروسك نفسها على كل جهاز. رمز المكتبة بمثابة كلمة سر، فلا يقرأ دروسك إلا من يعرفه.</p>
+          <input type="text" class="fld" id="sbUrl" dir="ltr" placeholder="https://xxxx.supabase.co" aria-label="عنوان المشروع" autocomplete="off">
+          <input type="text" class="fld" id="sbKey" dir="ltr" placeholder="anon / publishable key" aria-label="المفتاح العام" autocomplete="off">
+          <div class="row"><input type="text" class="fld" id="sbLib" dir="ltr" placeholder="رمز المكتبة، 8 أحرف أو أرقام فأكثر" aria-label="رمز المكتبة" autocomplete="off"><button class="ghost sm" id="sbGen">إنشاء رمز</button></div>
+          <div class="row"><button id="sbConnect">حفظ وربط</button><button class="ghost sm" id="sbNow" hidden>مزامنة الآن</button><button class="ghost sm" id="sbLinkBtn" hidden>🔗 رابط ربط جهاز آخر</button><button class="ghost sm" id="sbOff" hidden style="color:var(--bad);border-color:var(--bad)">فصل</button></div>
+          <input type="text" class="fld" id="sbLinkOut" dir="ltr" readonly hidden aria-label="رابط ربط جهاز آخر">
+          <p class="msg" id="sbMsg" role="status"></p>
+          <details>
+            <summary>طريقة الإعداد (مرة واحدة)</summary>
+            <ol style="margin:8px 0;padding-inline-start:20px;font-size:14px;line-height:1.7">
+              <li>أنشئ مشروعاً مجانياً في supabase.com (زر New project).</li>
+              <li>افتح <b>SQL Editor</b> والصق الكود أدناه ثم اضغط <b>Run</b>.</li>
+              <li>من <b>Project Settings ← API</b> انسخ Project URL والمفتاح العام (anon أو publishable) والصقهما أعلاه.</li>
+              <li>اضغط «إنشاء رمز» ثم «حفظ وربط». على الجهاز الآخر استخدم «رابط ربط جهاز آخر».</li>
+            </ol>
+            <textarea id="sbSql" readonly dir="ltr" style="min-height:150px;font-size:12px" aria-label="كود SQL"></textarea>
+            <div class="row" style="margin-top:6px"><button class="ghost sm" id="sbCopySql">نسخ الكود</button></div>
+          </details>
+        </div>
+      </details>
       <h3>دروسي <span id="lsMineN"></span></h3>
       <div class="lessons" id="lsMine"></div>
       <h3>دروس جاهزة</h3>
@@ -786,15 +809,18 @@ function lsInit(){
 const reqP=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const txDone=t=>new Promise((res,rej)=>{t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)});
 async function lsAll(){await lsInit();return idb?await reqP(idb.transaction("lessons").objectStore("lessons").getAll()):memLessons.slice()}
-async function lsPut(l){
+// quiet = a change that came from the sync itself, so it must not be sent back
+async function lsPut(l,quiet){
   await lsInit();
   if(idb){const t=idb.transaction("lessons","readwrite");t.objectStore("lessons").put(l);await txDone(t)}
   else{const i=memLessons.findIndex(x=>x.id===l.id);if(i<0)memLessons.push(l);else memLessons[i]=l}
+  if(!quiet&&typeof sbPush==="function")sbPush(l);
 }
-async function lsDel(id){
+async function lsDel(id,quiet){
   await lsInit();
   if(idb){const t=idb.transaction("lessons","readwrite");t.objectStore("lessons").delete(id);await txDone(t)}
   else memLessons=memLessons.filter(x=>x.id!==id);
+  if(!quiet&&typeof sbDel==="function")sbDel(id);
 }
 // --- logic:end
 
@@ -1045,6 +1071,172 @@ $("lsFile").addEventListener("change",async e=>{
 $("libBtn").onclick=openLib;
 $("ov3x").onclick=closeLib;
 $("ov3").addEventListener("click",e=>{if(e.target.id==="ov3")closeLib()});
+
+// ===== cross-device sync (Supabase) =====
+// The library code is the only key: the table has no direct access, and every call goes through
+// functions that require it, so nobody can list or read other libraries.
+const SB_SQL=`create table if not exists ew_lessons (
+  lib text not null, id text not null, title text not null,
+  items jsonb not null default '[]', updated bigint not null,
+  deleted boolean not null default false,
+  primary key (lib, id)
+);
+alter table ew_lessons enable row level security;
+
+create or replace function ew_get_index(p_lib text)
+returns table(id text, title text, updated bigint, deleted boolean)
+language sql security definer set search_path = public as $$
+  select l.id, l.title, l.updated, l.deleted from ew_lessons l
+  where l.lib = p_lib and length(p_lib) >= 8
+$$;
+
+create or replace function ew_get_lesson(p_lib text, p_id text)
+returns setof ew_lessons
+language sql security definer set search_path = public as $$
+  select * from ew_lessons where lib = p_lib and id = p_id and length(p_lib) >= 8
+$$;
+
+create or replace function ew_put_lesson(p_lib text, p_id text, p_title text, p_items jsonb, p_updated bigint, p_deleted boolean)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if length(p_lib) < 8 then raise exception 'code too short'; end if;
+  if octet_length(p_items::text) > 6000000 then raise exception 'lesson too large'; end if;
+  insert into ew_lessons (lib, id, title, items, updated, deleted)
+  values (p_lib, p_id, p_title, p_items, p_updated, p_deleted)
+  on conflict (lib, id) do update
+  set title = excluded.title, items = excluded.items,
+      updated = excluded.updated, deleted = excluded.deleted;
+end $$;
+
+grant execute on function ew_get_index(text), ew_get_lesson(text, text),
+  ew_put_lesson(text, text, text, jsonb, bigint, boolean) to anon;`;
+// --- sync logic:start
+let SB=ld("ew_sb",null),SBbusy=false,SBq=Promise.resolve();
+const sbValid=c=>!!c&&typeof c.u==="string"&&/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(c.u)&&typeof c.k==="string"&&c.k.length>20&&c.k.length<2000&&/^[\x21-\x7E]+$/.test(c.k)&&typeof c.l==="string"&&c.l.length>=8&&c.l.length<=64&&/^[A-Za-z0-9_-]+$/.test(c.l);
+const sbTomb=()=>ld("ew_tomb",{});
+async function sbRpc(name,body){
+  const h={"Content-Type":"application/json",apikey:SB.k};
+  if(SB.k.startsWith("eyJ"))h.Authorization="Bearer "+SB.k; // legacy JWT keys only
+  const r=await fetch(SB.u.replace(/\/+$/,"")+"/rest/v1/rpc/"+name,{method:"POST",headers:h,body:JSON.stringify(body)});
+  const txt=await r.text();
+  let data=null;try{data=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok){const e=new Error((data&&(data.message||data.hint))||("HTTP "+r.status));e.status=r.status;throw e}
+  return data;
+}
+function sbErr(e){
+  const m=String((e&&e.message)||"");
+  if(e instanceof TypeError)return "تعذّر الاتصال. تحقق من الإنترنت ومن عنوان المشروع.";
+  if(e&&(e.status===404||/Could not find the function|schema cache/i.test(m)))return "لم يُنفَّذ كود الإعداد بعد في Supabase. نفّذه من SQL Editor ثم أعد المحاولة.";
+  if(e&&(e.status===401||e.status===403||/api key|jwt/i.test(m)))return "المفتاح غير صحيح. انسخ المفتاح العام (anon أو publishable) من Project Settings ← API.";
+  return "تعذّرت المزامنة: "+m.slice(0,120);
+}
+const sbSay=(t,bad)=>{if(typeof say==="function")say("sbMsg",t,bad)};
+const putRemote=(l,del)=>sbRpc("ew_put_lesson",{p_lib:SB.l,p_id:l.id,p_title:l.title,p_items:del?[]:l.items,p_updated:del?(l.updated||Date.now()):(l.updated||Date.now()),p_deleted:!!del});
+// send one changed lesson (queued so changes go out in order)
+function sbPush(l){
+  if(!SB)return;
+  SBq=SBq.then(()=>putRemote(l,false)).then(()=>sbSay("☁️ تمت المزامنة")).catch(e=>sbSay(sbErr(e),1));
+}
+// a deletion is remembered locally until the server has it, so another device can't bring the lesson back
+function sbDel(id){
+  const t=sbTomb();t[id]=Date.now();sv("ew_tomb",t);
+  if(!SB)return;
+  SBq=SBq.then(()=>putRemote({id,title:"-",updated:t[id]},true)).then(()=>{const x=sbTomb();delete x[id];sv("ew_tomb",x);sbSay("☁️ تمت المزامنة")}).catch(e=>sbSay(sbErr(e),1));
+}
+// two-way merge by lesson id; the newer change wins
+async function sbSync(){
+  if(!SB||SBbusy)return null;
+  SBbusy=true;sbSay("جارٍ المزامنة…");
+  let pulled=0,pushed=0;
+  try{
+    const remote=(await sbRpc("ew_get_index",{p_lib:SB.l}))||[];
+    const local=await lsAll(),tomb=sbTomb();
+    const rm=new Map(remote.map(r=>[r.id,r])),lm=new Map(local.map(l=>[l.id,l]));
+    for(const r of remote){
+      const l=lm.get(r.id);
+      if(r.deleted){if(l&&(l.updated||0)<=r.updated){await lsDel(r.id,true);pulled++}continue}
+      if(tomb[r.id]&&tomb[r.id]>=r.updated)continue;           // deleted here more recently
+      if(!l||r.updated>(l.updated||0)){
+        const rows=await sbRpc("ew_get_lesson",{p_lib:SB.l,p_id:r.id});
+        const c=rows&&rows[0]?cleanLesson({title:rows[0].title,items:rows[0].items}):null;
+        if(c){await lsPut({id:r.id,title:c.title,items:c.items,created:r.updated,updated:r.updated},true);pulled++}
+      }
+    }
+    for(const l of await lsAll()){
+      const r=rm.get(l.id);
+      if(!r||(l.updated||0)>r.updated){await putRemote(l,false);pushed++}
+    }
+    for(const id of Object.keys(tomb)){
+      const r=rm.get(id);
+      if(r&&!r.deleted&&tomb[id]>=r.updated)await putRemote({id,title:"-",updated:tomb[id]},true);
+    }
+    sv("ew_tomb",{});
+    sbSay("☁️ تمت المزامنة. نُزّل "+pulled+" · رُفع "+pushed);
+  }catch(e){sbSay(sbErr(e),1);SBbusy=false;return null}
+  SBbusy=false;
+  return {pulled,pushed};
+}
+// --- sync logic:end
+
+function sbUi(){
+  const on=!!SB;
+  $("sbState").textContent=on?"· متصل ✅":"";
+  $("sbNow").hidden=!on;$("sbLinkBtn").hidden=!on;$("sbOff").hidden=!on;
+  if(on){$("sbUrl").value=SB.u;$("sbKey").value=SB.k;$("sbLib").value=SB.l}
+  $("sbLinkOut").hidden=true;
+}
+async function sbAfter(r){
+  if(r&&(r.pulled||r.pushed)){fillAutoSrc();if(!$("ov3").hidden)renderLessons()}
+}
+if(!window.claude){
+  $("sbBox").hidden=false;$("sbSql").value=SB_SQL;sbUi();
+  $("sbGen").onclick=()=>{
+    const al="abcdefghjkmnpqrstuvwxyz23456789",a=new Uint32Array(14);crypto.getRandomValues(a);
+    $("sbLib").value=[...a].map(x=>al[x%al.length]).join("");
+  };
+  $("sbConnect").onclick=async()=>{
+    const c={u:$("sbUrl").value.trim().replace(/\/+$/,""),k:$("sbKey").value.trim(),l:$("sbLib").value.trim()};
+    if(!sbValid(c)){sbSay("تحقق من البيانات: العنوان يشبه https://xxxx.supabase.co، والرمز 8 أحرف أو أرقام فأكثر (حروف وأرقام و - و _ فقط).",1);return}
+    const old=SB;SB=c;
+    try{await sbRpc("ew_get_index",{p_lib:c.l})}catch(e){SB=old;sbSay(sbErr(e),1);return}
+    sv("ew_sb",c);sbUi();sbAfter(await sbSync());
+  };
+  $("sbNow").onclick=async()=>sbAfter(await sbSync());
+  $("sbOff").onclick=()=>{
+    SB=null;try{localStorage.removeItem("ew_sb")}catch(e){}
+    $("sbKey").value="";$("sbLib").value="";sbUi();
+    sbSay("تم الفصل. دروسك على هذا الجهاز باقية.");
+  };
+  $("sbLinkBtn").onclick=async()=>{
+    if(!SB)return;
+    const j=JSON.stringify({u:SB.u,k:SB.k,l:SB.l});
+    const bytes=new TextEncoder().encode(j);let s="";bytes.forEach(b=>s+=String.fromCharCode(b));
+    const url=location.href.split("#")[0]+"#sb="+btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    const o=$("sbLinkOut");o.value=url;o.hidden=false;
+    try{await navigator.clipboard.writeText(url);sbSay("تم نسخ الرابط. افتحه على جهازك الآخر. لا تشاركه مع أحد، فهو يتضمن رمز مكتبتك.")}
+    catch(e){o.focus();o.select();sbSay("انسخ الرابط من المربع وافتحه على جهازك الآخر. لا تشاركه مع أحد.")}
+  };
+  $("sbCopySql").onclick=async()=>{
+    try{await navigator.clipboard.writeText(SB_SQL);sbSay("تم نسخ الكود.")}
+    catch(e){$("sbSql").focus();$("sbSql").select();sbSay("حدّد الكود وانسخه يدوياً.")}
+  };
+  $("libBtn").addEventListener("click",()=>{sbUi();if(SB)sbSync().then(sbAfter)});
+  // opening a link-device URL stores the settings and syncs
+  (function(){
+    const m=/^#sb=([A-Za-z0-9_-]+)$/.exec(location.hash);
+    if(!m)return;
+    try{
+      let b=m[1].replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+      const bin=atob(b),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+      const c=JSON.parse(new TextDecoder().decode(u8));
+      const cfg={u:String(c.u||"").replace(/\/+$/,""),k:String(c.k||""),l:String(c.l||"")};
+      if(sbValid(cfg)){SB=cfg;sv("ew_sb",cfg);sbUi();setTimeout(()=>say("setMsg","تم ربط هذا الجهاز بمكتبة الدروس."),0)}
+    }catch(e){}
+    try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  })();
+  if(SB)sbSync().then(sbAfter);
+}
 
 // ===== word game =====
 // --- game logic:start
